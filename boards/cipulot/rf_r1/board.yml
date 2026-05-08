@@ -1,0 +1,8 @@
+board:
+  name: rf_r1
+  full_name: Cipulot RF R1
+  vendor: cipulot
+  socs:
+    - name: stm32f411xe
+      variants:
+        - name: 87u

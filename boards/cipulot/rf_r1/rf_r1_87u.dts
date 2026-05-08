@@ -1,0 +1,18 @@
+/dts-v1/;
+
+#include "rf_r1.dtsi"
+
+/ {
+	chosen {
+		zmk,physical-layout = &layout_87u;
+	};
+};
+
+&kscan0 {
+	strobe-input-masks = <0>,                                                /* row 0: all 16 cols populated */
+			     <BIT(13)>,                                          /* row 1: col 13 = split-Bksp */
+			     <BIT(14)>,                                          /* row 2: col 14 unused */
+			     <BIT(12)>,                                          /* row 3: col 12 = split-Enter */
+			     <(BIT(1) + BIT(12))>,                               /* row 4: cols 1, 12 = split-L/RShift */
+			     <(BIT(3) + BIT(4) + BIT(5) + BIT(7))>;              /* row 5: cols 3-5 spacebar filler, col 7 gap */
+};

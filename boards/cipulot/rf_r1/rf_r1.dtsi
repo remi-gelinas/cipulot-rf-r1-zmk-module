@@ -1,0 +1,283 @@
+#include <st/f4/stm32f411Xe.dtsi>
+#include <st/f4/stm32f411c(c-e)ux-pinctrl.dtsi>
+
+#include <zephyr/dt-bindings/dt-util.h>
+#include <zephyr/dt-bindings/adc/adc.h>
+#include <zephyr/dt-bindings/adc/stm32_adc.h>
+
+#include <dt-bindings/zmk/matrix_transform.h>
+#include <dt-bindings/zmk/hid_indicators.h>
+
+#include "rf_r1-layouts.dtsi"
+
+/ {
+	model = "Cipulot RF R1";
+	compatible = "cipulot,rf-r1";
+
+	chosen {
+		zephyr,sram = &sram0;
+		zephyr,flash = &flash0;
+		zephyr,code-partition = &code_partition;
+		zephyr,settings-partition = &storage_partition;
+		zephyr,boot-mode = &boot_retention;
+		zmk,kscan = &kscan0;
+		zmk,magic-boot-mode = &magic_retention;
+	};
+
+	leds {
+		compatible = "gpio-leds";
+
+		caps_lock_led: caps_lock_led {
+			gpios = <&gpiob 3 GPIO_ACTIVE_HIGH>;
+			label = "Caps Lock";
+		};
+
+		scroll_lock_led: scroll_lock_led {
+			gpios = <&gpioa 14 GPIO_ACTIVE_HIGH>;
+			label = "Scroll Lock";
+		};
+	};
+
+	hid_indicators: hid_indicators {
+		compatible = "zmk,indicator-leds";
+
+		caps {
+			leds = <&caps_lock_led>;
+			indicator = <HID_INDICATOR_CAPS_LOCK>;
+		};
+
+		scroll {
+			leds = <&scroll_lock_led>;
+			indicator = <HID_INDICATOR_SCROLL_LOCK>;
+		};
+	};
+
+	mux_a: mux_a {
+		compatible = "zmk,gpio-mux";
+
+		select-gpios = <&gpiob 4 GPIO_ACTIVE_HIGH>,
+			       <&gpiob 5 GPIO_ACTIVE_HIGH>,
+			       <&gpiob 6 GPIO_ACTIVE_HIGH>;
+
+		en-gpios = <&gpiob 7 GPIO_ACTIVE_LOW>;
+
+		gpio-controller;
+		ngpios = <8>;
+		#gpio-cells = <2>;
+	};
+
+	mux_b: mux_b {
+		compatible = "zmk,gpio-mux";
+
+		select-gpios = <&gpiob 4 GPIO_ACTIVE_HIGH>,
+			       <&gpiob 5 GPIO_ACTIVE_HIGH>,
+			       <&gpiob 6 GPIO_ACTIVE_HIGH>;
+
+		en-gpios = <&gpioa 6 GPIO_ACTIVE_LOW>;
+
+		gpio-controller;
+		ngpios = <8>;
+		#gpio-cells = <2>;
+	};
+
+	kscan0: kscan {
+		compatible = "zmk,kscan-ec-matrix";
+		status = "okay";
+
+		pinctrl-0 = <&ec_strobe_pb15 &ec_strobe_pa8
+			     &ec_strobe_pb13 &ec_strobe_pb12
+			     &ec_strobe_pb14 &ec_strobe_pb0>;
+		pinctrl-names = "default";
+
+		strobe-gpios = <&gpiob 15 GPIO_ACTIVE_HIGH>,
+			       <&gpioa 8 GPIO_ACTIVE_HIGH>,
+			       <&gpiob 13 GPIO_ACTIVE_HIGH>,
+			       <&gpiob 12 GPIO_ACTIVE_HIGH>,
+			       <&gpiob 14 GPIO_ACTIVE_HIGH>,
+			       <&gpiob 0 GPIO_ACTIVE_HIGH>;
+
+		input-gpios = <&mux_a 3 0>, <&mux_a 0 0>, <&mux_a 1 0>, <&mux_a 2 0>,
+			      <&mux_a 4 0>, <&mux_a 6 0>, <&mux_a 7 0>, <&mux_a 5 0>,
+			      <&mux_b 3 0>, <&mux_b 0 0>, <&mux_b 1 0>, <&mux_b 2 0>,
+			      <&mux_b 4 0>, <&mux_b 6 0>, <&mux_b 7 0>, <&mux_b 5 0>;
+
+		io-channels = <&adc1 3>;
+		drain-gpios = <&gpioa 4 GPIO_OPEN_DRAIN>;
+
+		matrix-relax-us = <0>;
+		adc-read-settle-us = <0>;
+		trigger-percentage = <55>;
+
+		skip-startup-calibration;
+	};
+};
+
+&clk_hse {
+	clock-frequency = <DT_FREQ_M(8)>;
+	status = "okay";
+};
+
+&clk_lsi {
+	status = "okay";
+};
+
+&pll {
+	div-m = <8>;
+	mul-n = <336>;
+	div-p = <4>;
+	div-q = <7>;
+	clocks = <&clk_hse>;
+	status = "okay";
+};
+
+&rcc {
+	clocks = <&pll>;
+	clock-frequency = <DT_FREQ_M(84)>;
+	ahb-prescaler = <1>;
+	apb1-prescaler = <2>;
+	apb2-prescaler = <1>;
+};
+
+zephyr_udc0: &usbotg_fs {
+	pinctrl-0 = <&usb_otg_fs_dm_pa11 &usb_otg_fs_dp_pa12>;
+	pinctrl-names = "default";
+	status = "okay";
+};
+
+&adc1 {
+	pinctrl-0 = <&adc1_in3_pa3>;
+	pinctrl-names = "default";
+	st,adc-clock-source = "SYNC";
+	st,adc-prescaler = <2>;
+	status = "okay";
+
+	#address-cells = <1>;
+	#size-cells = <0>;
+
+	channel@3 {
+		reg = <3>;
+		zephyr,gain = "ADC_GAIN_1";
+		zephyr,reference = "ADC_REF_INTERNAL";
+		zephyr,acquisition-time = <ADC_ACQ_TIME_DEFAULT>;
+		zephyr,resolution = <10>;
+	};
+};
+
+&pinctrl {
+	ec_strobe_pa8: ec_strobe_pa8 {
+		pinmux = <STM32_PINMUX('A', 8, GPIO)>;
+		slew-rate = "very-high-speed";
+	};
+
+	ec_strobe_pb0: ec_strobe_pb0 {
+		pinmux = <STM32_PINMUX('B', 0, GPIO)>;
+		slew-rate = "very-high-speed";
+	};
+
+	ec_strobe_pb12: ec_strobe_pb12 {
+		pinmux = <STM32_PINMUX('B', 12, GPIO)>;
+		slew-rate = "very-high-speed";
+	};
+
+	ec_strobe_pb13: ec_strobe_pb13 {
+		pinmux = <STM32_PINMUX('B', 13, GPIO)>;
+		slew-rate = "very-high-speed";
+	};
+
+	ec_strobe_pb14: ec_strobe_pb14 {
+		pinmux = <STM32_PINMUX('B', 14, GPIO)>;
+		slew-rate = "very-high-speed";
+	};
+
+	ec_strobe_pb15: ec_strobe_pb15 {
+		pinmux = <STM32_PINMUX('B', 15, GPIO)>;
+		slew-rate = "very-high-speed";
+	};
+};
+
+&sram0 {
+	reg = <0x20000000 0x1fffc>;
+};
+
+/ {
+	sram@2001fffc {
+		compatible = "zephyr,memory-region", "mmio-sram";
+		reg = <0x2001fffc 0x4>;
+		zephyr,memory-region = "RetainedMem";
+		status = "okay";
+
+		retainedmem {
+			compatible = "zephyr,retained-ram";
+			status = "okay";
+			#address-cells = <1>;
+			#size-cells = <1>;
+
+			magic_retention: retention@0 {
+				compatible = "zephyr,retention";
+				status = "okay";
+				reg = <0x0 0x4>;
+			};
+		};
+	};
+
+	magic_mapper {
+		compatible = "zmk,bootmode-to-magic-mapper";
+		status = "okay";
+		#address-cells = <1>;
+		#size-cells = <1>;
+
+		boot_retention: retention@0 {
+			compatible = "zephyr,retention";
+			status = "okay";
+			reg = <0x0 0x1>;
+		};
+	};
+};
+
+&gpioc {
+	status = "disabled";
+};
+
+&gpiod {
+	status = "disabled";
+};
+
+&gpioe {
+	status = "disabled";
+};
+
+&gpiof {
+	status = "disabled";
+};
+
+&gpiog {
+	status = "disabled";
+};
+
+&gpioh {
+	status = "disabled";
+};
+
+&flash0 {
+	partitions {
+		compatible = "fixed-partitions";
+		#address-cells = <1>;
+		#size-cells = <1>;
+
+		boot_partition: partition@0 {
+			label = "tinyuf2";
+			reg = <0x00000000 DT_SIZE_K(32)>;
+			read-only;
+		};
+
+		storage_partition: partition@8000 {
+			label = "storage";
+			reg = <0x00008000 DT_SIZE_K(32)>;
+		};
+
+		code_partition: partition@10000 {
+			label = "code";
+			reg = <0x00010000 DT_SIZE_K(448)>;
+		};
+	};
+};

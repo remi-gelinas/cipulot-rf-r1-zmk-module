@@ -1,0 +1,30 @@
+.act/
+.pre-commit-config.yaml
+build/
+*.bin
+*.uf2
+*.hex
+*.elf
+*.map
+
+# Nix
+result
+result-*
+.direnv/
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+
+# direnv local overrides
+.envrc.local
+
+# Editors
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# macOS
+.DS_Store
