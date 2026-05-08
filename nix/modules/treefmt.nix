@@ -36,7 +36,7 @@
             ".overlay"
           ];
 
-          # I guess it doesn't like macro abuse
+          # dts-linter hugely corrupts this one, might be worth an issue
           excludes = [
             "boards/cipulot/rf_r1/rf_r1-layouts.dtsi"
           ];
