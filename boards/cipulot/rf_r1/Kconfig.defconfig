@@ -9,10 +9,4 @@ config ZMK_USB
 config ZMK_HID_INDICATORS
 	default y
 
-config BUILD_OUTPUT_UF2_USE_FLASH_BASE
-	default y
-
-config BUILD_OUTPUT_UF2_USE_FLASH_OFFSET
-	default y
-
 endif # BOARD_RF_R1

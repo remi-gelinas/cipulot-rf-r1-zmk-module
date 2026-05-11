@@ -19,9 +19,8 @@
 		zephyr,flash = &flash0;
 		zephyr,code-partition = &code_partition;
 		zephyr,settings-partition = &storage_partition;
-		zephyr,boot-mode = &boot_retention;
+		zephyr,boot-mode = &boot_mode;
 		zmk,kscan = &kscan0;
-		zmk,magic-boot-mode = &magic_retention;
 	};
 
 	leds {
@@ -200,7 +199,7 @@ zephyr_udc0: &usbotg_fs {
 };
 
 / {
-	sram@2001fffc {
+	sram_ret: sram@2001fffc {
 		compatible = "zephyr,memory-region", "mmio-sram";
 		reg = <0x2001fffc 0x4>;
 		zephyr,memory-region = "RetainedMem";
@@ -212,24 +211,11 @@ zephyr_udc0: &usbotg_fs {
 			#address-cells = <1>;
 			#size-cells = <1>;
 
-			magic_retention: retention@0 {
+			boot_mode: retention@0 {
 				compatible = "zephyr,retention";
 				status = "okay";
-				reg = <0x0 0x4>;
+				reg = <0x0 0x1>;
 			};
-		};
-	};
-
-	magic_mapper {
-		compatible = "zmk,bootmode-to-magic-mapper";
-		status = "okay";
-		#address-cells = <1>;
-		#size-cells = <1>;
-
-		boot_retention: retention@0 {
-			compatible = "zephyr,retention";
-			status = "okay";
-			reg = <0x0 0x1>;
 		};
 	};
 };
@@ -264,20 +250,14 @@ zephyr_udc0: &usbotg_fs {
 		#address-cells = <1>;
 		#size-cells = <1>;
 
-		boot_partition: partition@0 {
-			label = "tinyuf2";
-			reg = <0x00000000 DT_SIZE_K(32)>;
-			read-only;
-		};
-
-		storage_partition: partition@8000 {
-			label = "storage";
-			reg = <0x00008000 DT_SIZE_K(32)>;
-		};
-
-		code_partition: partition@10000 {
+		code_partition: partition@0 {
 			label = "code";
-			reg = <0x00010000 DT_SIZE_K(448)>;
+			reg = <0x00000000 DT_SIZE_K(256)>;
+		};
+
+		storage_partition: partition@40000 {
+			label = "storage";
+			reg = <0x00040000 DT_SIZE_K(256)>;
 		};
 	};
 };
