@@ -2,3 +2,4 @@ build:
   cmake: settings
   settings:
     board_root: .
+    snippet_root: .

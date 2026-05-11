@@ -1,0 +1,3 @@
+name: cipulot-calibrator
+append:
+  EXTRA_CONF_FILE: cipulot-calibrator.conf

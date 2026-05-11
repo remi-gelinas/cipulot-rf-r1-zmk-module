@@ -106,6 +106,7 @@
 		matrix-relax-us = <0>;
 		adc-read-settle-us = <0>;
 		trigger-percentage = <55>;
+		active-polling-interval-ms = <0>;
 
 		skip-startup-calibration;
 	};

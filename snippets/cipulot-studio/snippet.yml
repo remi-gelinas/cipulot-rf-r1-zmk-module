@@ -1,0 +1,3 @@
+name: cipulot-studio
+append:
+  EXTRA_CONF_FILE: cipulot-studio.conf

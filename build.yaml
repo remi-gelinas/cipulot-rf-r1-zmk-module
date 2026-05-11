@@ -1,9 +1,8 @@
 include:
   - board: rf_r1//87u
-    snippet: studio-rpc-usb-uart
-    cmake-args: -DCONFIG_ZMK_STUDIO=y
+    snippet: "studio-rpc-usb-uart;cipulot-studio"
     artifact-name: rf_r1_87u
 
   - board: rf_r1//87u
-    snippet: "cdc-acm-console;zmk-analog-matrix-calibrator"
+    snippet: "cdc-acm-console;zmk-analog-matrix-calibrator;cipulot-calibrator"
     artifact-name: rf_r1_87u_calibrator
